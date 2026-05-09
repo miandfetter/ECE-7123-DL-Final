@@ -38,7 +38,7 @@ ECE-7123-DL-Final/
 pip install peft==0.18.1 bitsandbytes accelerate datasets pillow transformers pandas
 ```
 
-### Kaggle (recommended for GPU access)
+### Kaggle 
 
 1. Upload `finetuning-vqa-model-bestRun.ipynb` to a Kaggle notebook.
 2. Add the `pixels-to-predictions` competition dataset.
