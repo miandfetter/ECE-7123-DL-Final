@@ -28,6 +28,35 @@ ECE-7123-DL-Final/
         warmup scheduler. 
 ```
 ---
+---
+
+## How to Reproduce
+
+### Prerequisites
+
+```bash
+pip install peft==0.18.1 bitsandbytes accelerate datasets pillow transformers pandas
+```
+
+### Kaggle (recommended for GPU access)
+
+1. Upload `finetuning-vqa-model-bestRun.ipynb` to a Kaggle notebook.
+2. Add the `pixels-to-predictions` competition dataset.
+3. Enable GPU (T4 x1) under **Settings → Accelerator**.
+4. Run all cells. The best LoRA checkpoint is saved to `/kaggle/working/run11/` and a `submission.csv` is generated.
+
+### Google Colab
+
+1. Open `colab_version_kaggle (7).ipynb` in Google Colab.
+2. Set your Kaggle API token as a Colab secret (`KAGGLE_API_TOKEN`).
+3. Mount Google Drive (used to save checkpoints between sessions).
+4. Enable a GPU runtime (T4 recommended).
+5. Run all cells. Checkpoints save to `MyDrive/vqa-checkpoints/first_colab/`.
+
+---
+
+
+
 
 ## Key Design Decisions
 
@@ -84,46 +113,5 @@ We use **Low-Rank Adaptation (LoRA)** via `peft` to fine-tune only a small fract
 | Colab (not best, but submitted)  | 4 | 16 | q, k, v, o only            | ~1.0M (0.20%) |
 
 
-### Training Strategy
-
-Due to compute constraints (free-tier T4 GPU), we train on a **random subset of 100–1000 samples per epoch** rather than the full 3,109-sample training set. Key hyperparameters:
-
-| Setting | Kaggle best run | Colab best run |
-|---------|----------------|----------------|
-| Batch size | 1 | 1 |
-| Epochs | 3 | 2 |
-| Samples/epoch | 100 | 1,000 |
-| Learning rate | 2e-4 | 5e-5 |
-| LR schedule | CosineAnnealingLR | Linear warmup + linear decay |
-| Optimizer | AdamW | AdamW |
-| Gradient clipping | 1.0 | 1.0 |
-
-
----
-
-## How to Reproduce
-
-### Prerequisites
-
-```bash
-pip install peft==0.18.1 bitsandbytes accelerate datasets pillow transformers pandas
-```
-
-### Kaggle (recommended for GPU access)
-
-1. Upload `finetuning-vqa-model-bestRun.ipynb` to a Kaggle notebook.
-2. Add the `pixels-to-predictions` competition dataset.
-3. Enable GPU (T4 x1) under **Settings → Accelerator**.
-4. Run all cells. The best LoRA checkpoint is saved to `/kaggle/working/run11/` and a `submission.csv` is generated.
-
-### Google Colab
-
-1. Open `colab_version_kaggle (7).ipynb` in Google Colab.
-2. Set your Kaggle API token as a Colab secret (`KAGGLE_API_TOKEN`).
-3. Mount Google Drive (used to save checkpoints between sessions).
-4. Enable a GPU runtime (T4 recommended).
-5. Run all cells. Checkpoints save to `MyDrive/vqa-checkpoints/first_colab/`.
-
----
 
 
