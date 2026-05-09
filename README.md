@@ -97,7 +97,7 @@ The goal is to predict the correct answer letter for each question in the test s
 
 ### Model
 
-We fine-tune **[SmolVLM-500M-Instruct](https://huggingface.co/HuggingFaceTB/SmolVLM-500M-Instruct)**, a 500M-parameter Vision Language Model from HuggingFace. It was chosen for its small footprint (fits on a free Kaggle/Colab T4 GPU) while still having strong multimodal capabilities.
+Fine-tuned **[SmolVLM-500M-Instruct](https://huggingface.co/HuggingFaceTB/SmolVLM-500M-Instruct)**, a 500M-parameter Vision Language Model from HuggingFace. It was chosen for its small footprint (fits on a free Kaggle/Colab T4 GPU) while still having strong multimodal capabilities.
 
 ### Memory Efficiency: 4-bit Quantization
 
@@ -106,7 +106,7 @@ The base model is loaded in **4-bit NF4 quantization** via `bitsandbytes` to red
 
 ### Parameter-Efficient Fine-Tuning: LoRA
 
-We use **Low-Rank Adaptation (LoRA)** via `peft` to fine-tune only a small fraction of model parameters (~0.2–0.9% of total), keeping the quantized base model frozen.
+**Low-Rank Adaptation (LoRA)** was used via `peft` to fine-tune only a small fraction of model parameters (~0.2–0.9% of total), keeping the quantized base model frozen.
 
 | Run | LoRA rank (`r`) | LoRA alpha | Target modules | Trainable params |
 |-----|-----------------|------------|----------------|------------------|
