@@ -6,6 +6,33 @@
 > To view rendered notebook output with plots, use NBViewer:
 > [Data_Exploration.ipynb on NBViewer](https://nbviewer.org/github/miandfetter/ECE-7123-DL-Final/blob/main/Data_Exploration.ipynb?flush_cache=true)
 
+## Repository Structure
+
+```
+ECE-7123-DL-Final/
+│
+├── Data_Exploration.ipynb
+│   Exploratory data analysis: subject/grade distributions, answer balance,
+│   text length histograms, class imbalance analysis, and weighted sampling motivation.
+│   Run on Google Colab. Use NBViewer link above for rendered plots.
+│
+└── Training_Inference_Code/
+    │
+    ├── finetuning-vqa-model-bestRun.ipynb
+    │   Best Kaggle notebook run. Trains on 1000 samples/epoch for 3 epochs using
+    │   LoRA r=8 targeting all attention + MLP projection layers.Generates and saves a submission.csv for Kaggle.
+    │
+    └── colab_version_kaggle (7).ipynb
+        Best Google Colab notebook run and the version submitted with model weights. Trains on 1000 samples/epoch for 2 epochs
+        using LoRA r=4 targeting attention layers only, with a lower LR and linear
+        warmup scheduler. 
+```
+---
+
+## Key Design Decisions
+
+- **Why LoRA instead of full fine-tuning?** The 4-bit quantized base model cannot be updated directly; LoRA adapters train on top of frozen quantized weights, which is the standard approach for QLoRA.
+- **Why a small training subset?** Full dataset training would take several hours per epoch on a T4. We trade data volume for iteration speed, using random sampling each epoch to still expose the model to diverse examples over multiple runs and using the results to guide longer training runs with thousands of examples.
 ---
 
 ## Task Overview
@@ -47,13 +74,6 @@ We fine-tune **[SmolVLM-500M-Instruct](https://huggingface.co/HuggingFaceTB/Smol
 
 The base model is loaded in **4-bit NF4 quantization** via `bitsandbytes` to reduce GPU memory usage from ~2 GB (float16) to ~512 MB, enabling training on a 16 GB T4.
 
-```python
-bnb_config = BitsAndBytesConfig(
-    load_in_4bit=True,
-    bnb_4bit_quant_type="nf4",
-    bnb_4bit_compute_dtype=torch.float16,
-)
-```
 
 ### Parameter-Efficient Fine-Tuning: LoRA
 
@@ -63,28 +83,6 @@ We use **Low-Rank Adaptation (LoRA)** via `peft` to fine-tune only a small fract
 |-----|-----------------|------------|----------------|------------------|
 | Colab (not best, but submitted)  | 4 | 16 | q, k, v, o only            | ~1.0M (0.20%) |
 
-### Prompt Engineering
-
-Each sample is formatted as a structured text prompt:
-
-```
-<image>
-You are a science teacher. Answer the following multiple choice question by selecting the correct letter.
-Subject: natural science | Grade: grade8
-Topic: literacy-in-science
-Context:
-[lecture text]
-[hint text]
-
-Question: [question text]
-Choices:
-  A. [choice 0]
-  B. [choice 1]
-  C. [choice 2]
-Answer:
-```
-
-During training, the correct answer letter is appended after `Answer:`. During inference, the model generates the answer letter. The loss is masked so only the answer token is supervised (the prompt is masked with `-100`).
 
 ### Training Strategy
 
@@ -100,29 +98,6 @@ Due to compute constraints (free-tier T4 GPU), we train on a **random subset of 
 | Optimizer | AdamW | AdamW |
 | Gradient clipping | 1.0 | 1.0 |
 
----
-
-## Repository Structure
-
-```
-ECE-7123-DL-Final/
-│
-├── Data_Exploration.ipynb
-│   Exploratory data analysis: subject/grade distributions, answer balance,
-│   text length histograms, class imbalance analysis, and weighted sampling motivation.
-│   Run on Google Colab. Use NBViewer link above for rendered plots.
-│
-└── Training_Inference_Code/
-    │
-    ├── finetuning-vqa-model-bestRun.ipynb
-    │   Best Kaggle notebook run. Trains on 1000 samples/epoch for 3 epochs using
-    │   LoRA r=8 targeting all attention + MLP projection layers.Generates and saves a submission.csv for Kaggle.
-    │
-    └── colab_version_kaggle (7).ipynb
-        Best Google Colab notebook run and the version submitted with model weights. Trains on 1000 samples/epoch for 2 epochs
-        using LoRA r=4 targeting attention layers only, with a lower LR and linear
-        warmup scheduler. 
-```
 
 ---
 
@@ -151,8 +126,4 @@ pip install peft==0.18.1 bitsandbytes accelerate datasets pillow transformers pa
 
 ---
 
-## Key Design Decisions
-
-- **Why LoRA instead of full fine-tuning?** The 4-bit quantized base model cannot be updated directly; LoRA adapters train on top of frozen quantized weights, which is the standard approach for QLoRA.
-- **Why a small training subset?** Full dataset training would take several hours per epoch on a T4. We trade data volume for iteration speed, using random sampling each epoch to still expose the model to diverse examples over multiple runs and using the results to guide longer training runs with thousands of examples.
 
