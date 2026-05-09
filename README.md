@@ -61,7 +61,7 @@ pip install peft==0.18.1 bitsandbytes accelerate datasets pillow transformers pa
 ## Key Design Decisions
 
 - **Why LoRA instead of full fine-tuning?** The 4-bit quantized base model cannot be updated directly; LoRA adapters train on top of frozen quantized weights, which is the standard approach for QLoRA.
-- **Why a small training subset?** Full dataset training would take several hours per epoch on a T4. We trade data volume for iteration speed, using random sampling each epoch to still expose the model to diverse examples over multiple runs and using the results to guide longer training runs with thousands of examples.
+- **Why a small training subset?** Full dataset training would take several hours per epoch on a T4. Smaller experiments were performed to see if changes made meaningful differences in performance, and favorable results were expanded to training runs with more training examples to optimize GPU training time availble. 
 ---
 
 ## Task Overview
